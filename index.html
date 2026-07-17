@@ -1,0 +1,140 @@
+
+<html lang="en">
+  <head>
+    <script>window.onerror = function() { return true; };</script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="author" content="Elite Assets Architecture" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./favicon.svg" />
+
+    <meta name="theme-color" content="#050505" /> 
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Luxury 969" />
+
+    <title>Elite Assets | Global Luxury Marketplace & Investment Portal</title>
+    <meta name="title" content="Elite Assets | Global Luxury Marketplace & Investment Portal" />
+    <meta name="description" content="Access a curated collection of high-valuation assets, from luxury automobiles to exclusive real estate. Secure, transparent, and enterprise-grade investment ecosystem." />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://your-luxury-marketplace.com/" />
+    <meta property="og:title" content="Elite Assets | Global Luxury Marketplace" />
+    <meta property="og:description" content="Trade and invest in world-class luxury assets with unmatched security." />
+    <meta property="og:image" content="/favicon.svg" />
+    <meta property="og:image:alt" content="Elite Assets Marketplace - High Value Investments" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Elite Assets" />
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="Elite Assets | Global Luxury Marketplace" />
+    <meta property="twitter:description" content="Trade and invest in world-class luxury assets with unmatched security." />
+    <meta property="twitter:image" content="/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link rel="icon" type="image/png" href="./favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <style>
+      #elite-preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #050505;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.8s ease-out, visibility 0.8s;
+      }
+      
+      #elite-preloader.is-loaded {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .loader-bar-container {
+        width: 200px;
+        height: 2px;
+        background: rgba(212, 175, 55, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .loader-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 40%;
+        background-color: #D4AF37;
+        box-shadow: 0 0 15px #D4AF37, 0 0 30px rgba(212, 175, 55, 0.5);
+        animation: loading-glide 1.5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+      }
+
+      .loader-text {
+        margin-top: 20px;
+        color: #D4AF37;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        font-size: 12px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        opacity: 0.8;
+      }
+
+      @keyframes loading-glide {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(350%); }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-BxCg_UWS.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/react-vendor-Z1l5z0ww.js">
+    <link rel="modulepreload" crossorigin href="./assets/animation-vendor-B_kQx2GB.js">
+    <link rel="modulepreload" crossorigin href="./assets/ui-vendor-D858WepN.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-B00jEu2V.css">
+  </head>
+  
+  <body>
+    <div id="elite-preloader">
+      <div class="loader-bar-container">
+        <div class="loader-bar"></div>
+      </div>
+      <div class="loader-text">Initializing Secure Protocols</div>
+    </div>
+
+    <noscript>
+      <div style="text-align: center; padding: 100px 20px; color: #fff; background: #050505; height: 100vh;">
+        <h1 style="color: #d4af37;">Security Protocol Interrupted</h1>
+        <p style="max-width: 600px; margin: 20px auto; color: #888;">This luxury marketplace requires JavaScript to initialize secure asset protocols.</p>
+      </div>
+    </noscript>
+
+    <div id="root"></div>
+
+
+
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          const preloader = document.getElementById('elite-preloader');
+          if (preloader) {
+            preloader.classList.add('is-loaded');
+            setTimeout(() => preloader.remove(), 1000);
+          }
+        }, 500);
+      });
+    </script>
+  </body>
+</html>
