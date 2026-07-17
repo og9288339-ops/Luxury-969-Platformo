@@ -1,7 +1,0 @@
-node_modules/
-dist/
-.netlify/
-.npmrc
-my_project_backup.tar.gz
-nginx.conf
-.env
