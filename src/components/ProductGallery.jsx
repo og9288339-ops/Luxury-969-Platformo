@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import ProductCard from './ProductCard.jsx';
-import { getAllProducts } from '../services/productService.js';
+import { getCollectionData } from '../services/firestore.js';
 
 // ============================================================================
 // MOTION VARIANTS
@@ -103,7 +104,10 @@ const ProductGallery = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getAllProducts();
+      const data = await getCollectionData('products', {
+        orderBy: { field: 'createdAt', direction: 'desc' },
+        limit: 50
+      });
       setProducts(data);
     } catch (err) {
       setError(err.message);

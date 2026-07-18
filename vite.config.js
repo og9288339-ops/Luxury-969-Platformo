@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   
   // Base path for deployment (Cloudflare Pages compatibility)
-  base: './',
+  base: '/Luxury-969-Platformo/',
   
   // Build configuration for production optimization
   build: {
