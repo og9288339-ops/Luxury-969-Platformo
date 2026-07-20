@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import './index.css';
@@ -15,7 +16,7 @@ import './index.css';
 // - CSS Injection: Global styles imported before component rendering
 //
 // Deployment Configuration:
-// - BrowserRouter basename is configured in App.jsx as '/Luxury-969-Platformo/'
+// - BrowserRouter basename is configured here as '/Luxury-969-Platformo/'
 // - This non-negotiable path ensures proper routing in production environment
 // ============================================================================
 
@@ -36,7 +37,9 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <App />
+      <BrowserRouter basename="/Luxury-969-Platformo/">
+        <App />
+      </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>
 );

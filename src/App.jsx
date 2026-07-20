@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import Layout from './components/layout/Layout.jsx';
+import Layout from './components/Layout.jsx';
 
 // ============================================================================
 // LAZY LOADED PAGES - Code splitting for optimal performance
@@ -10,7 +10,7 @@ import Layout from './components/layout/Layout.jsx';
 const Home = lazy(() => import('./pages/Home.jsx'));
 const AuctionsPage = lazy(() => import('./pages/AuctionsPage.jsx'));
 const InsightsPage = lazy(() => import('./pages/InsightsPage.jsx'));
-const MarketplacePage = lazy(() => import('./pages/Marketplace.jsx'));
+const MarketplacePage = lazy(() => import('./pages/MarketplacePage.jsx'));
 const ProductGallery = lazy(() => import('./components/ProductGallery.jsx'));
 
 // ============================================================================
@@ -95,26 +95,24 @@ const routeConfig = [
 
 const App = () => {
   return (
-    <Router basename="/Luxury-969-Platformo/">
-      <Layout>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {routeConfig.map(({ path, component: Component }) => (
-              <Route 
-                key={path}
-                path={path} 
-                element={
-                  <PageTransition>
-                    <Component />
-                  </PageTransition>
-                } 
-              />
-            ))}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-      </Layout>
-    </Router>
+    <Layout>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {routeConfig.map(({ path, component: Component }) => (
+            <Route 
+              key={path}
+              path={path} 
+              element={
+                <PageTransition>
+                  <Component />
+                </PageTransition>
+              } 
+            />
+          ))}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </Layout>
   );
 };
 
