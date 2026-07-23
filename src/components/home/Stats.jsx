@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion';
 import { TrendingUp, Users, DollarSign, Globe, ArrowUpRight, Activity } from 'lucide-react';

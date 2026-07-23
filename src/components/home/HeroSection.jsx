@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Sparkles, Zap, Shield, Globe } from 'lucide-react';

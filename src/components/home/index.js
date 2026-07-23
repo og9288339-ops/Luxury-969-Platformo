@@ -1,121 +1,125 @@
-
-
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './index.css';
 
 // ============================================================================
-// ERROR BOUNDARY COMPONENT
+// PERFORMANCE MONITORING
 // ============================================================================
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('Component Error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex items-center justify-center min-h-[400px] bg-gray-900/50 rounded-2xl border border-gray-800/50">
-          <div className="text-center">
-            <p className="text-gray-400 mb-4">Something went wrong loading this section.</p>
-            <button
-              onClick={() => this.setState({ hasError: false })}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      );
+if (process.env.NODE_ENV === 'production') {
+  // Report web vitals to analytics
+  const reportWebVitals = (onPerfEntry) => {
+    if (onPerfEntry && onPerfEntry instanceof Function) {
+      import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+        getCLS(onPerfEntry);
+        getFID(onPerfEntry);
+        getFCP(onPerfEntry);
+        getLCP(onPerfEntry);
+        getTTFB(onPerfEntry);
+      });
     }
+  };
 
-    return this.props.children;
-  }
+  reportWebVitals((metric) => {
+    // Send to your analytics service
+    console.log('Web Vital:', metric);
+  });
 }
 
 // ============================================================================
-// LOADING FALLBACK COMPONENT
+// SERVICE WORKER REGISTRATION
 // ============================================================================
+const registerServiceWorker = () => {
+  if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('SW registered: ', registration);
+        })
+        .catch((registrationError) => {
+          console.log('SW registration failed: ', registrationError);
+        });
+    });
+  }
+};
 
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-[400px] bg-gray-900/30 rounded-2xl border border-gray-800/50">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
-      <p className="text-gray-500 text-sm">Loading...</p>
-    </div>
-  </div>
+registerServiceWorker();
+
+// ============================================================================
+// ERROR HANDLING
+// ============================================================================
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+});
+
+// ============================================================================
+// FEATURE DETECTION
+// ============================================================================
+const checkBrowserSupport = () => {
+  const requiredFeatures = [
+    'Promise',
+    'fetch',
+    'IntersectionObserver',
+    'requestAnimationFrame',
+  ];
+
+  const missingFeatures = requiredFeatures.filter(
+    (feature) => !(feature in window)
+  );
+
+  if (missingFeatures.length > 0) {
+    console.warn('Missing browser features:', missingFeatures);
+  }
+};
+
+checkBrowserSupport();
+
+// ============================================================================
+// PERFORMANCE OPTIMIZATION
+// ============================================================================
+// Enable React DevTools in development
+if (process.env.NODE_ENV === 'development') {
+  import('@welldone-software/why-did-you-render')
+    .then((whyDidYouRender) => {
+      whyDidYouRender.default(React, {
+        trackAllPureComponents: true,
+      });
+    })
+    .catch(() => {
+      // Module not available, continue without it
+    });
+}
+
+// ============================================================================
+// ROOT RENDERING
+// ============================================================================
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('Root element not found. Ensure index.html contains a div with id="root"');
+}
+
+const root = ReactDOM.createRoot(rootElement);
+
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );
 
 // ============================================================================
-// LAZY LOADED COMPONENTS
+// HOT MODULE REPLACEMENT
 // ============================================================================
-
-const HeroSection = lazy(() => import('./HeroSection.jsx'));
-const FeaturesSection = lazy(() => import('./FeaturesSection.jsx'));
-const LiveAuctionGrid = lazy(() => import('./LiveAuctionGrid.jsx'));
-const Stats = lazy(() => import('./Stats.jsx'));
-const TestimonialsSection = lazy(() => import('./TestimonialsSection.jsx'));
-const NewsletterSection = lazy(() => import('./NewsletterSection.jsx'));
-const AllInsightsSection = lazy(() => import('./AllInsightsSection.jsx'));
+if (import.meta.hot) {
+  import.meta.hot.accept();
+}
 
 // ============================================================================
-// WRAPPER COMPONENT WITH ERROR BOUNDARY AND SUSPENSE
+// APP INITIALIZATION COMPLETE
 // ============================================================================
+console.log('🚀 Application initialized successfully');
 
-const withBoundary = (Component) => {
-  return (props) => (
-    <ErrorBoundary>
-      <Suspense fallback={<LoadingFallback />}>
-        <Component {...props} />
-      </Suspense>
-    </ErrorBoundary>
-  );
-};
-
-// ============================================================================
-// EXPORT WRAPPED COMPONENTS
-// ============================================================================
-
-export const HeroSectionWrapped = withBoundary(HeroSection);
-export const FeaturesSectionWrapped = withBoundary(FeaturesSection);
-export const LiveAuctionGridWrapped = withBoundary(LiveAuctionGrid);
-export const StatsWrapped = withBoundary(Stats);
-export const TestimonialsSectionWrapped = withBoundary(TestimonialsSection);
-export const NewsletterSectionWrapped = withBoundary(NewsletterSection);
-export const AllInsightsSectionWrapped = withBoundary(AllInsightsSection);
-
-// ============================================================================
-// NAMED EXPORTS FOR DIRECT IMPORT (WITHOUT LAZY LOADING)
-// ============================================================================
-
-// Uncomment these if you want to import components directly without lazy loading
-// export { default as HeroSection } from './HeroSection.jsx';
-// export { default as FeaturesSection } from './FeaturesSection.jsx';
-// export { default as LiveAuctionGrid } from './LiveAuctionGrid.jsx';
-// export { default as Stats } from './Stats.jsx';
-// export { default as TestimonialsSection } from './TestimonialsSection.jsx';
-// export { default as NewsletterSection } from './NewsletterSection.jsx';
-// export { default as AllInsightsSection } from './AllInsightsSection.jsx';
-
-// ============================================================================
-// DEFAULT EXPORT (OPTIONAL)
-// ============================================================================
-
-// You can also export all components as an object if needed
-export default {
-  HeroSection: HeroSectionWrapped,
-  FeaturesSection: FeaturesSectionWrapped,
-  LiveAuctionGrid: LiveAuctionGridWrapped,
-  Stats: StatsWrapped,
-  TestimonialsSection: TestimonialsSectionWrapped,
-  NewsletterSection: NewsletterSectionWrapped,
-  AllInsightsSection: AllInsightsSectionWrapped,
-};

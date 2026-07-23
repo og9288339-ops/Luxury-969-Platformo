@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote, ChevronLeft, ChevronRight, Linkedin, Twitter } from 'lucide-react';

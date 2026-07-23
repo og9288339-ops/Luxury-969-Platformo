@@ -1,17 +1,17 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import Layout from './components/Layout.jsx';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Layout from './components/layout/Layout.jsx';
+import { PortfolioProvider } from './contexts/PortfolioContext';
 
 // ============================================================================
 // LAZY LOADED PAGES - Code splitting for optimal performance
 // ============================================================================
 
 const Home = lazy(() => import('./pages/Home.jsx'));
-const AuctionsPage = lazy(() => import('./pages/AuctionsPage.jsx'));
-const InsightsPage = lazy(() => import('./pages/InsightsPage.jsx'));
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage.jsx'));
-const ProductGallery = lazy(() => import('./components/ProductGallery.jsx'));
+const ProductDetails = lazy(() => import('./components/ProductDetails.jsx'));
+const Checkout = lazy(() => import('./pages/Checkout.jsx'));
 
 // ============================================================================
 // PREMIUM LOADING COMPONENT - Elegant loading state with smooth transitions
@@ -51,31 +51,6 @@ const PageLoader = () => (
   </motion.div>
 );
 
-// ============================================================================
-// ROUTE TRANSITION WRAPPER - Smooth fade-in animation for page transitions
-// ============================================================================
-
-const PageTransition = ({ children }) => {
-  const location = useLocation();
-  
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ 
-          duration: 0.4, 
-          ease: [0.4, 0, 0.2, 1] 
-        }}
-        className="w-full"
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
-  );
-};
 
 // ============================================================================
 // ROUTE CONFIGURATION - Clean, modular route definitions
@@ -83,10 +58,9 @@ const PageTransition = ({ children }) => {
 
 const routeConfig = [
   { path: '/', component: Home },
-  { path: '/auctions', component: AuctionsPage },
-  { path: '/insights', component: InsightsPage },
   { path: '/marketplace', component: MarketplacePage },
-  { path: '/gallery', component: ProductGallery },
+  { path: '/product/:id', component: ProductDetails },
+  { path: '/checkout', component: Checkout },
 ];
 
 // ============================================================================
@@ -95,24 +69,24 @@ const routeConfig = [
 
 const App = () => {
   return (
-    <Layout>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {routeConfig.map(({ path, component: Component }) => (
-            <Route 
-              key={path}
-              path={path} 
-              element={
-                <PageTransition>
-                  <Component />
-                </PageTransition>
-              } 
-            />
-          ))}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
-    </Layout>
+    <PortfolioProvider>
+      <BrowserRouter basename="/Luxury-969-Platformo/">
+        <Layout>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {routeConfig.map(({ path, component: Component }) => (
+                <Route 
+                  key={path}
+                  path={path} 
+                  element={<Component />} 
+                />
+              ))}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </Layout>
+      </BrowserRouter>
+    </PortfolioProvider>
   );
 };
 

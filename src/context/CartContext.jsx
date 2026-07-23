@@ -1,9 +1,7 @@
-// contexts/CartContext.jsx
 import React, { createContext, useContext, useReducer, useEffect, useMemo, useCallback } from 'react';
 
 /**
  * 💎 Luxury Assets Marketplace (969) - Portfolio Intelligence Context
- * 
  * Enterprise-grade Portfolio Management replacing traditional 'cart' functionality
  * 
  * Features:
@@ -39,7 +37,8 @@ const initialState = {
   taxEstimate: 0,
   feeEstimate: 0,
   isCalculating: false,
-  lastAddedAsset: null
+  lastAddedAsset: null,
+  syncStatus: 'synced' // 'synced' | 'pending' | 'error'
 };
 
 // Action types
@@ -47,9 +46,12 @@ const ACTION_TYPES = {
   ADD_ASSET: 'ADD_ASSET',
   REMOVE_ASSET: 'REMOVE_ASSET',
   CLEAR_PORTFOLIO: 'CLEAR_PORTFOLIO',
+  RESTORE_PORTFOLIO: 'RESTORE_PORTFOLIO',
+  UPDATE_ASSET_VALUATION: 'UPDATE_ASSET_VALUATION',
   UPDATE_VALUATIONS: 'UPDATE_VALUATIONS',
   SET_CALCULATING: 'SET_CALCULATING',
-  SET_LAST_ADDED: 'SET_LAST_ADDED'
+  SET_LAST_ADDED: 'SET_LAST_ADDED',
+  SET_SYNC_STATUS: 'SET_SYNC_STATUS'
 };
 
 /**
@@ -87,6 +89,26 @@ const portfolioReducer = (state, action) => {
         lastAddedAsset: null
       };
 
+    case ACTION_TYPES.RESTORE_PORTFOLIO:
+      // Replace entire assets array at once from localStorage
+      return {
+        ...state,
+        assets: action.payload || [],
+        isCalculating: true
+      };
+
+    case ACTION_TYPES.UPDATE_ASSET_VALUATION:
+      // Update specific asset's valuation directly without re-adding
+      return {
+        ...state,
+        assets: state.assets.map(asset =>
+          asset.id === action.payload.assetId
+            ? { ...asset, fairMarketPrice: action.payload.newValuation }
+            : asset
+        ),
+        isCalculating: true
+      };
+
     case ACTION_TYPES.UPDATE_VALUATIONS:
       return {
         ...state,
@@ -108,6 +130,12 @@ const portfolioReducer = (state, action) => {
         lastAddedAsset: action.payload
       };
 
+    case ACTION_TYPES.SET_SYNC_STATUS:
+      return {
+        ...state,
+        syncStatus: action.payload
+      };
+
     default:
       return state;
   }
@@ -115,26 +143,30 @@ const portfolioReducer = (state, action) => {
 
 /**
  * Calculate portfolio totals with luxury tax logic
+ * Uses precise rounding to avoid floating-point errors
  */
 const calculatePortfolioTotals = (assets) => {
   if (!Array.isArray(assets)) return { totalValuation: 0, taxEstimate: 0, feeEstimate: 0 };
 
+  // Use precise rounding to 2 decimal places for currency calculations
   const totalValuation = assets.reduce((sum, asset) => {
     const value = Number(asset.fairMarketPrice || asset.valuation || 0);
-    return sum + (isNaN(value) ? 0 : value);
+    const roundedValue = Math.round(value * 100) / 100; // Round to 2 decimal places
+    return sum + (isNaN(roundedValue) ? 0 : roundedValue);
   }, 0);
 
-  // Luxury tax: 8.25% for high-value portfolios
-  const taxEstimate = Math.round(totalValuation * 0.0825);
+  // Round total valuation to 2 decimal places
+  const roundedTotalValuation = Math.round(totalValuation * 100) / 100;
+
+  // Luxury tax: 8.25% for high-value portfolios - precise calculation
+  const taxEstimate = Math.round((roundedTotalValuation * 0.0825) * 100) / 100;
   
-  // Platform fee: 1.75% + $250k minimum for concierge service
-  const feeEstimate = Math.max(
-    250000,
-    Math.round(totalValuation * 0.0175)
-  );
+  // Platform fee: 1.75% + $250k minimum for concierge service - precise calculation
+  const feeCalculation = Math.round((roundedTotalValuation * 0.0175) * 100) / 100;
+  const feeEstimate = Math.max(250000, feeCalculation);
 
   return {
-    totalValuation: Math.round(totalValuation),
+    totalValuation: roundedTotalValuation,
     taxEstimate,
     feeEstimate
   };
@@ -169,16 +201,26 @@ export const PortfolioProvider = ({ children }) => {
       const saved = localStorage.getItem(PORTFOLIO_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        
+        // Data integrity validation: ensure parsed.assets is a valid array
+        if (!parsed.assets || !Array.isArray(parsed.assets)) {
+          console.warn('Corrupted portfolio data detected, resetting to initial state');
+          dispatch({ type: ACTION_TYPES.CLEAR_PORTFOLIO });
+          return;
+        }
+
         // Restore assets only if recent (24h)
         if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
           dispatch({
-            type: ACTION_TYPES.ADD_ASSET,
-            payload: parsed.assets // This will trigger multiple ADD_ASSET actions
+            type: ACTION_TYPES.RESTORE_PORTFOLIO,
+            payload: parsed.assets
           });
         }
       }
     } catch (error) {
       console.error('Failed to load portfolio:', error);
+      // Reset to initial state on any parsing error
+      dispatch({ type: ACTION_TYPES.CLEAR_PORTFOLIO });
     }
   }, []);
 
@@ -259,15 +301,10 @@ export const PortfolioProvider = ({ children }) => {
    */
   const updateAssetValuation = useCallback((assetId, newValuation) => {
     dispatch({
-      type: ACTION_TYPES.ADD_ASSET,
-      payload: state.assets.find(asset => asset.id === assetId)
-        ? {
-            ...state.assets.find(asset => asset.id === assetId),
-            fairMarketPrice: newValuation
-          }
-        : null
+      type: ACTION_TYPES.UPDATE_ASSET_VALUATION,
+      payload: { assetId, newValuation }
     });
-  }, [state.assets]);
+  }, []);
 
   // Memoized computed values
   const portfolioValue = useMemo(() => ({
@@ -277,9 +314,20 @@ export const PortfolioProvider = ({ children }) => {
     grandTotal: state.totalValuation + state.taxEstimate + state.feeEstimate,
     assetCount: state.assets.length,
     averageValue: state.assets.length > 0 
-      ? Math.round(state.totalValuation / state.assets.length)
+      ? Math.round((state.totalValuation / state.assets.length) * 100) / 100
       : 0
   }), [state.totalValuation, state.taxEstimate, state.feeEstimate, state.assets.length]);
+
+  // Memoized grand total formatted as currency string
+  const getGrandTotal = useMemo(() => {
+    const grandTotal = state.totalValuation + state.taxEstimate + state.feeEstimate;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(grandTotal);
+  }, [state.totalValuation, state.taxEstimate, state.feeEstimate]);
 
   const value = {
     // State
@@ -292,14 +340,17 @@ export const PortfolioProvider = ({ children }) => {
     removeAsset,
     clearPortfolio,
     updateAssetValuation,
+    setSyncStatus: (status) => dispatch({ type: ACTION_TYPES.SET_SYNC_STATUS, payload: status }),
     
     // Status
     hasPortfolio: state.assets.length > 0,
     isCalculating: state.isCalculating,
     lastAddedAsset: state.lastAddedAsset,
+    syncStatus: state.syncStatus,
     
     // Utils
-    getAssetById: (id) => state.assets.find(asset => asset.id === id)
+    getAssetById: (id) => state.assets.find(asset => asset.id === id),
+    getGrandTotal
   };
 
   return (

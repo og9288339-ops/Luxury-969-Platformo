@@ -44,6 +44,13 @@ const Navbar = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
 
+  const navItems = [
+  { path: '/', label: 'Home', icon: <Home className="w-4 h-4" /> },
+  { path: '/marketplace', label: 'Marketplace', icon: <ShoppingBag className="w-4 h-4" /> },
+  { path: '/checkout', label: 'Checkout', icon: <Sparkles className="w-4 h-4" /> }, // أضفناها
+  { path: '/wallet', label: 'Wallet', icon: <BarChart3 className="w-4 h-4" /> },   // أضفناها
+];
+
   useEffect(() => {
     const controlNavbar = () => {
       if (window.scrollY > lastScrollY && window.scrollY > 100) { 
